@@ -7,6 +7,7 @@ import (
 	"io"
 	"math/rand"
 	"os"
+	"runtime"
 	"time"
 )
 
@@ -161,13 +162,11 @@ func main() {
 		out = os.Stdout
 	}
 
-	// FIXME: tune performance
-	const io_buf_size = 4096
-	const line_buf_size = 1000
-	const workers = 2
+	io_buf_size := 1024 * 64
+	chan_size := 10000
+	workers := runtime.NumCPU() * 2
 
-	// FIXME: too long
-	if err := write(out, size, io_buf_size, line_buf_size, workers); err != nil {
+	if err := write(out, size, io_buf_size, chan_size, workers); err != nil {
 		fmt.Fprintf(os.Stderr, "%v\n", err)
 		os.Exit(3)
 	}
