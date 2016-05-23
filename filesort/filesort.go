@@ -344,7 +344,11 @@ func main() {
 
 	flag.Parse()
 
-	// fixme: guard against non-positive limit
+	// Guard against non-positive limit
+	if limit < 1 {
+		fmt.Fprintln(os.Stderr, "error: limit must be positive number")
+		os.Exit(1)
+	}
 
 	if (flag.NArg() > 2) || help {
 		fmt.Fprintln(os.Stderr,
