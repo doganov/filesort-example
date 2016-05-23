@@ -107,8 +107,6 @@ func write(w io.Writer, size uint64, io_buf_size, chan_size, workers int) error 
 		shutdown <- true
 	}()
 
-	const nl = byte('\n')
-
 	var count uint64 = 0
 	for line := range lines(shutdown, chan_size, workers) {
 		if count >= size {
@@ -122,7 +120,7 @@ func write(w io.Writer, size uint64, io_buf_size, chan_size, workers int) error 
 
 		_, err := out.Write(line)
 		if err == nil {
-			err = out.WriteByte(nl)
+			err = out.WriteByte('\n')
 		}
 
 		if err != nil {
@@ -137,7 +135,7 @@ func main() {
 	var size uint64
 	var help bool
 
-	flag.Uint64Var(&size, "size", 1024*1024, "output file size in bytes")
+	flag.Uint64Var(&size, "size", 1024*1024*10, "output file size in bytes")
 	flag.BoolVar(&help, "help", false, "displays this help message")
 
 	flag.Parse()
