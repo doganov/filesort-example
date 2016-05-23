@@ -27,7 +27,7 @@ Create 4GB test file named `in.txt`:
 $ bin/filegen --size=4294967296 in.txt
 ```
 
-Sort it on disk with small memory footprint:
+Sort it on disk with limited memory footprint:
 
 ```
 $ bin/filesort --limit=100000 in.txt out.txt
