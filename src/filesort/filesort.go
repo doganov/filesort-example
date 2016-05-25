@@ -288,7 +288,7 @@ func writeChunk(lines []string) (string, error) {
 // in memory.  Returns the created filenames.
 func split(r io.Reader, limit int) ([]string, error) {
 	in := bufio.NewReader(r)
-	chunk_names := make([]string, 0)
+	var chunk_names []string
 	var err error
 
 	for err == nil {
