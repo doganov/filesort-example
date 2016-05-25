@@ -5,7 +5,7 @@ PACKAGES=filegen filesort
 
 export GOPATH := $(shell pwd)
 
-all: build
+all: build test
 
 build: bin/filegen bin/filesort
 
