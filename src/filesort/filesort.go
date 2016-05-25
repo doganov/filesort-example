@@ -24,6 +24,8 @@ func max(a, b int) int {
 	return b
 }
 
+// Breaks apart a slice into multiple subslices, with limited number of items
+// each.
 func strSliceSplit(s []string, limit int) [][]string {
 	if limit < 1 {
 		panic("Non-positive limit")
@@ -39,6 +41,7 @@ func strSliceSplit(s []string, limit int) [][]string {
 	return result
 }
 
+// Deletes a filename without reporting back errors, if any.
 func deleteFile(filename string) {
 	fmt.Fprintf(os.Stderr, "Erasing temp file %v...\n", filename)
 	if err := os.Remove(filename); err != nil {
@@ -46,23 +49,28 @@ func deleteFile(filename string) {
 	}
 }
 
+// Deletes multiple filenames without reporting back errors, if any.
 func deleteFiles(filenames []string) {
 	for _, filename := range filenames {
 		deleteFile(filename)
 	}
 }
 
+// A source represents sorted text file as a stack, where only the top line is
+// available.
 type source struct {
 	top string
 	r   *bufio.Reader
 }
 
+// Updates the top line with the next one from the file.
 func (s *source) pop() error {
 	var err error
 	s.top, err = s.r.ReadString('\n')
 	return err
 }
 
+// A sourceSet combines multiple sources into one sorted stack of lines.
 type sourceSet map[*source]bool
 
 func newSourceSet(rs []io.Reader) (sourceSet, error) {
@@ -83,6 +91,8 @@ func newSourceSet(rs []io.Reader) (sourceSet, error) {
 	return ss, nil
 }
 
+// Returns the current minimum line in the whole sourceSet, removing it from the
+// set.
 func (ss sourceSet) popMin() (string, error) {
 	var min *source
 	first := true
@@ -110,10 +120,14 @@ func (ss sourceSet) popMin() (string, error) {
 	return result, err
 }
 
+// A stringWriter is a writer that accepts strings. This is a common interface
+// for bufio.Writer and bytes.Buffer, allowing interchangable use of one instead
+// of the other.
 type stringWriter interface {
 	WriteString(s string) (int, error)
 }
 
+// Merges a set of sorted inputs into one sorted output.
 func mergeSimple(rs []io.Reader, w stringWriter) error {
 	// Initialize source set
 	sources, err := newSourceSet(rs)
@@ -134,6 +148,8 @@ func mergeSimple(rs []io.Reader, w stringWriter) error {
 	return err
 }
 
+// Merges a set of sorted input files into one sorted output file.  After the
+// merge input files are deleted.
 func mergeSimpleFiles(names []string) (string, error) {
 
 	// Schedule deletion of all input files
@@ -184,6 +200,10 @@ func mergeSimpleFiles(names []string) (string, error) {
 	return outf.Name(), err
 }
 
+// Merges a set of sorted input files into one sorted output file, using no more
+// than limit number opened input files at a time.  After the merge the input
+// files are deleted, unless it is only one file, in which case it is returned
+// as result.
 func merge(names []string, limit int) (string, error) {
 	// Handle basic cases
 	switch len(names) {
@@ -213,6 +233,8 @@ func merge(names []string, limit int) (string, error) {
 	return merge(reduced_names, limit)
 }
 
+// Reads limit number of lines from a bufio.Reader.  If the last line does not
+// end with a newline, it is automatically appended.
 func readLines(r *bufio.Reader, limit int) ([]string, error) {
 	lines := make([]string, 0, limit)
 	var err error
@@ -237,6 +259,7 @@ func readLines(r *bufio.Reader, limit int) ([]string, error) {
 	return lines, err
 }
 
+// Writes an initial sorted chunk as temp file and returns its name.
 func writeChunk(lines []string) (string, error) {
 	f, err := ioutil.TempFile("", "filesort_chunk_")
 	if err != nil {
@@ -260,6 +283,9 @@ func writeChunk(lines []string) (string, error) {
 	return name, buf.Flush()
 }
 
+// Splits an input io.Reader into a number of output chunk files, with no more
+// than limit number of lines in each file.  Lines inside each chunk are sorted
+// in memory.  Returns the created filenames.
 func split(r io.Reader, limit int) ([]string, error) {
 	in := bufio.NewReader(r)
 	chunk_names := make([]string, 0)
@@ -292,6 +318,9 @@ func split(r io.Reader, limit int) ([]string, error) {
 	return chunk_names, err
 }
 
+// Reads and all lines from an input io.Reader and sorts them into an output
+// file.  The sorting algorithm uses no more than limit number of lines at a
+// time.  Returns the name of the sorted output file.
 func sortLines(r io.Reader, limit int) (string, error) {
 	names, err := split(r, limit)
 	if err != nil {
@@ -302,6 +331,9 @@ func sortLines(r io.Reader, limit int) (string, error) {
 	return merge(names, min(100, max(10, limit)))
 }
 
+// Reads and all lines from an input io.Reader and sorts them into a specified
+// output file.  The sorting algorithm uses no more than limit number of lines
+// at a time.
 func sortLinesFile(r io.Reader, limit int, outfile string) error {
 	name, err := sortLines(r, limit)
 	if err != nil {
@@ -311,6 +343,9 @@ func sortLinesFile(r io.Reader, limit int, outfile string) error {
 	return os.Rename(name, outfile)
 }
 
+// Reads and all lines from an input io.Reader and writes them in sorted order
+// into a specified output io.Writer.  The sorting algorithm uses no more than
+// limit number of lines at a time.
 func sortLinesWrite(r io.Reader, limit int, w io.Writer) error {
 	name, err := sortLines(r, limit)
 	if err != nil {
