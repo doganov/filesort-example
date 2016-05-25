@@ -15,8 +15,8 @@ const (
 	charset_start     = byte('!') // 0x21
 	charset_stop      = byte('~') // 0x7e
 	charset_size      = int(charset_stop - charset_start + 1)
-	fragments         = 8  //12
-	max_fragment_size = 12 //8
+	fragments         = 8
+	max_fragment_size = 12
 )
 
 var charset [charset_size]byte
@@ -27,25 +27,6 @@ func init() {
 		charset[i] = charset_start + byte(i)
 	}
 }
-
-/*
-func max(a, b int) int {
-	if a > b {
-		return a
-	}
-	return b
-}
-*/
-
-/*
-interface lineGenerator {
-	line() string
-}
-
-struct simpleLineGenerator {
-	random *rand.Rand
-}
-*/
 
 // Returns line using the specified random generator.
 func line(random *rand.Rand) []byte {
