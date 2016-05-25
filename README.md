@@ -1,6 +1,11 @@
 # filesort
 Large text file sorting example in Go
 
+## Requirements
+
+- Go 1.6 (probably works with earlier versions, but not tested)
+- GNU Make
+
 ## Download
 
 ```
