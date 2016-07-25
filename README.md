@@ -40,9 +40,9 @@ $ bin/filesort --limit=100000 in.txt out.txt
 
 The `--limit` option specifies the maximum number of lines to be included in the
 initial chunks. Since the initial chunks are sorted in memory (one by one), the
-the memory footprint depends on the size of one chunk.  Larger chunk consumes
-more memory. Smaller chunk consumes less memory, but yields more chunks
-and hence -- more I/O operations to merge them.
+memory footprint depends on the size of one chunk.  Larger chunk consumes more
+memory. Smaller chunk consumes less memory, but yields more chunks and hence --
+more I/O operations to merge them.
 
 When the output filename is omitted, `filesort` writes to the standard
 output. When the inputfile is omitted, `filesort` reads from the standard input.
